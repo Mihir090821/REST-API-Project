@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Api Crud</title>
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/jquery.js"></script>
+</head>
+
+<body>
+    <!-- Modal For Insert -->
+    <div class="modal" id="insert" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Data</h5>
+                    <button type="button" class="btn-close" id="close1" ata-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="frmadd">
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Student Name</label>
+                            <input type="email" class="form-control" id="Isname" placeholder="Student Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Age</label>
+                            <input type="email" class="form-control" id="Iage" placeholder="Enter The Age">
+                        </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="close2" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="Isave">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal For Update -->
+    <div class="modal" id="update" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Data</h5>
+                    <button type="button" class="btn-close" id="close3" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form id="frmupdate">
+                    <div class="modal-body">
+                        <input type="hidden" name="" id="Eid">
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Student Name</label>
+                            <input type="email" class="form-control" id="ESname" placeholder="Student Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Age</label>
+                            <input type="email" class="form-control" id="EAge" placeholder="Enter The Age">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="close4"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success" id="btnedit">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Grid View -->
+
+    <div class="alert alert-primary" role="alert">
+        <h2 class="text-center">API CRUD APPLICATION</h2>
+    </div>
+    <div class="container">
+
+        <div class="row mb-3">
+            <div class="col-md-3 ">
+                <button class="btn btn-primary btn-ld mb-2" id="Add">Add New</button>
+            </div>
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control mb-2 mt-1" id="serch" placeholder="Serch">
+
+            </div>
+
+        </div>
+
+
+        <table class="table table-success table-striped">
+            <tbody id="tbl">
+                <tr class="text-center">
+                    <th>Id</th>
+                    <th>Student Name</th>
+                    <th>Age</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function () {
+
+            // codes for load data
+            function load() {
+                $("#tbl").html("");
+
+                $.ajax({
+                    url: "http://localhost:8080/api/fetch.php",
+                    type: "GET",
+                    success: function (data) {
+                        if (data.status == false) {
+
+                            $("#tbl").append("<tr><td colspan='5'><h2>" + data.msg + "</h2></td></tr>")
+                        }
+                        $.each(data, function (key, value) {
+
+                            $("#tbl").append("<tr class='text-center'><td>" + value.Sid + "</td><td>" +
+                                value.Sname + "</td><td>" +
+                                value.Age + "</td>" +
+                                "<td><button class='btn btn-success' id='edit' data-sid='" + value.Sid + "'>Edit</button></td>" +
+                                "<td>  <button class='btn btn-danger' id='delete'  data-sid='" + value.Sid + "' >Delete</button></td></tr>");
+
+                        });
+                    }
+
+                });
+            }
+            load();
+
+            // codes for Hide Modals
+
+            $("#close1").on("click", function () {
+                $("#insert").hide();
+                load();
+            });
+            $("#close2").on("click", function () {
+                $("#insert").hide();
+                load();
+            });
+            $("#close3").on("click", function () {
+                $("#update").hide();
+                load();
+            });
+            $("#close4").on("click", function () {
+                $("#update").hide();
+                load();
+            });
+
+            // codes for delte data
+            $(document).on("click", "#delete", function () {
+                var sid = $(this).data("sid");
+                var obj = { sid: sid };
+                var json_srting = JSON.stringify(obj);
+
+                if (confirm("DO You Really Want to Delete Data?")) {
+                    $.ajax({
+                        url: "http://localhost:8080/api/Delete-data.php",
+                        type: "DELETE",
+                        data: json_srting,
+                        success: function (data) {
+                            if (data.status == false) {
+                                alert(data.msg);
+
+                            } else {
+                                alert(data.msg);
+                                load();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // codes for Add Data
+            $("#Add").on("click", function () {
+                $("#insert").show();
+
+            });
+            $("#Isave").on("click", function (e) {
+                e.preventDefault();
+                var Sname = $("#Isname").val();
+                var Age = $("#Iage").val();
+
+                if (Sname == "" && Age == "") {
+                    alert("All Fields Are Requaired");
+
+                } else {
+
+                    var obj = {
+                        sname: Sname,
+                        age: Age
+                    };
+
+                    var Json = JSON.stringify(obj);
+
+                    $.ajax({
+                        url: "http://localhost:8080/api/insert-data.php",
+                        type: "POST",
+                        data: Json,
+                        success: function (data) {
+                            if (data.status == false) {
+                                alert(data.msg);
+                            } else {
+                                alert(data.msg);
+                                $("#frmadd")[0].reset();
+
+                            }
+                        }
+                    });
+                }
+
+            });
+
+            // codes for Updata data
+            $(document).on("click", "#edit", function () {
+                $("#update").show();
+                var Id = $(this).data("sid");
+                var obj = { sid: Id };
+                var sid = JSON.stringify(obj);
+                $("#Eid").val(Id);
+                $.ajax({
+                    url: "http://localhost:8080/api/fetch-single.php",
+                    type: "POST",
+                    data: sid,
+                    success: function (data) {
+                        if (data.status == false) {
+                            alert(data.msg);
+                        } else {
+
+                            $("#ESname").val(data[0].Sname);
+                            $("#EAge").val(data[0].Age);
+                        }
+
+                    }
+                });
+            });
+            $("#btnedit").on("click", function () {
+                var Eid = $("#Eid").val();
+                var Esname = $("#ESname").val();
+                var Eage = $("#EAge").val();
+                if (Esname == "" && Eage == "") {
+                    alert("All Fields Are Requaire");
+                }
+                else {
+                    var obj = {
+                        "sid": Eid,
+                        "sname": Esname,
+                        "age": Eage
+                    };
+                    var jsondata = JSON.stringify(obj);
+                    $.ajax({
+                        url: "http://localhost:8080/api/Update-data.php",
+                        type: "PUT",
+                        data: jsondata,
+                        success: function (data) {
+                            if (data.status == false) {
+                                alert(data.msg);
+                            } else {
+                                alert(data.msg);
+                                $("#update").hide();
+                                load();
+                            }
+                        }
+                    });
+
+                }
+
+            });
+
+            // codes for search data
+            $("#serch").on("keyup", function () {
+
+                var search = $(this).val();
+                var obj = { serch_term: search };
+                var obj = { serch_term: search };
+                var json_data = JSON.stringify(obj);
+                $("#tbl").html("");
+
+
+                if (search == "") {
+                    window.location.href = 'index.html';
+                }
+
+                $.ajax({
+                    url: "http://localhost:8080/api/search-data.php?serch_term=" + search,
+                    type: "GET",
+                    success: function (data) {
+                        if (data.status == false) {
+
+                            $("#tbl").append("<tr><td colspan='5'> <h1 text='center'>" + data.msg + "</h1></td></tr>")
+
+                        } else {
+                            $.each(data, function (key, value) {
+
+
+                                $("#tbl").append("<tr>" +
+                                    "<td>" + value.Sid + "</td>" +
+                                    "<td>" + value.Sname + "</td>" +
+                                    "<td>" + value.Age + "</td>" +
+                                    "<td><button class='btn btn-success' id='edit' data-sid='" + value.Sid + "'>Edit</button></td>" +
+                                    "<td><button class='btn btn-danger' id='delete'  data-sid='" + value.Sid + "' >Delete</button></td>" +
+                                    "</tr>"
+                                )
+
+                            });
+
+                        }
+                    }
+
+                });
+
+            });
+        });
+
+    </script>
+
+
+
+</body>
+
+
+</html>
